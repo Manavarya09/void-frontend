@@ -1,11 +1,12 @@
-import { useState } from 'react';
-import { motion, AnimatePresence } from 'motion/react';
-import { Users, EyeOff, Flame, MessageSquare } from 'lucide-react';
+import React, { useState } from 'react';
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
+import { MotiView, AnimatePresence } from 'moti';
+import { Users, EyeOff, Flame, MessageSquare } from 'lucide-react-native';
 
 const VIBE_ROOMS = [
-  { id: 1, name: 'Midnight Rants', users: 42, theme: 'neon-pink', tag: 'Chaos' },
-  { id: 2, name: 'Goth GF/BF Search', users: 13, theme: 'neon-cyan', tag: 'Dating' },
-  { id: 3, name: 'Noise Music Only', users: 7, theme: 'neon-yellow', tag: 'Music' },
+  { id: 1, name: 'Midnight Rants', users: 42, themeColor: '#FF00FF', tag: 'Chaos' },
+  { id: 2, name: 'Goth GF/BF Search', users: 13, themeColor: '#00FFFF', tag: 'Dating' },
+  { id: 3, name: 'Noise Music Only', users: 7, themeColor: '#FFFF00', tag: 'Music' },
 ];
 
 const CONFESSIONS = [
@@ -14,106 +15,292 @@ const CONFESSIONS = [
 ];
 
 export default function VibeRooms() {
-  const [activeTab, setActiveTab] = useState<'rooms' | 'confessions'>('rooms');
+  const [activeTab, setActiveTab] = useState('rooms');
 
   return (
-    <div className="absolute inset-0 bg-void-black z-30 flex flex-col pt-12 pb-20 px-4">
-      <header className="flex justify-between items-center mb-6">
-        <h1 className="text-3xl font-anton text-white uppercase tracking-widest glitch-text" data-text="VIBES">
-          VIBES
-        </h1>
-      </header>
+    <View style={styles.container}>
+      <View style={styles.header}>
+        <Text style={styles.headerTitle}>VIBES</Text>
+      </View>
 
       {/* Tabs */}
-      <div className="flex gap-4 mb-6">
-        <button 
-          onClick={() => setActiveTab('rooms')}
-          className={`flex-1 py-3 font-anton text-xl uppercase tracking-wider border-2 transition-colors ${
-            activeTab === 'rooms' ? 'bg-neon-green text-black border-neon-green' : 'bg-transparent text-white/50 border-white/20'
-          }`}
+      <View style={styles.tabsContainer}>
+        <TouchableOpacity
+          onPress={() => setActiveTab('rooms')}
+          style={[styles.tabBtn, activeTab === 'rooms' ? styles.tabActiveRooms : styles.tabInactive]}
         >
-          Rooms
-        </button>
-        <button 
-          onClick={() => setActiveTab('confessions')}
-          className={`flex-1 py-3 font-anton text-xl uppercase tracking-wider border-2 transition-colors ${
-            activeTab === 'confessions' ? 'bg-neon-pink text-black border-neon-pink' : 'bg-transparent text-white/50 border-white/20'
-          }`}
+          <Text style={[styles.tabText, activeTab === 'rooms' ? { color: '#000' } : { color: 'rgba(255,255,255,0.5)' }]}>
+            ROOMS
+          </Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          onPress={() => setActiveTab('confessions')}
+          style={[styles.tabBtn, activeTab === 'confessions' ? styles.tabActiveConfessions : styles.tabInactive]}
         >
-          Secrets
-        </button>
-      </div>
+          <Text style={[styles.tabText, activeTab === 'confessions' ? { color: '#000' } : { color: 'rgba(255,255,255,0.5)' }]}>
+            SECRETS
+          </Text>
+        </TouchableOpacity>
+      </View>
 
-      <div className="flex-1 overflow-y-auto">
-        <AnimatePresence mode="wait">
+      <ScrollView style={styles.contentContainer} showsVerticalScrollIndicator={false}>
+        <AnimatePresence exitBeforeEnter>
           {activeTab === 'rooms' && (
-            <motion.div
+            <MotiView
               key="rooms"
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: -20 }}
-              className="space-y-4"
+              from={{ opacity: 0, translateX: -20 }}
+              animate={{ opacity: 1, translateX: 0 }}
+              exit={{ opacity: 0, translateX: -20 }}
+              transition={{ type: 'timing', duration: 300 }}
+              style={styles.listContainer}
             >
-              <div className="sticker absolute top-32 right-4 z-10 text-xs rotate-12 text-neon-cyan border-neon-cyan">
-                Live Now
-              </div>
-              {VIBE_ROOMS.map((room, i) => (
-                <div key={room.id} className={`p-4 border-2 border-${room.theme} bg-void-gray relative group cursor-pointer hover:bg-${room.theme}/10 transition-colors`}>
-                  <div className="flex justify-between items-start mb-2">
-                    <h3 className={`font-anton text-2xl text-${room.theme} uppercase`}>{room.name}</h3>
-                    <div className="flex items-center gap-1 text-white/50 font-mono text-xs">
-                      <Users size={12} />
-                      <span>{room.users}</span>
-                    </div>
-                  </div>
-                  <div className="flex justify-between items-end">
-                    <span className="px-2 py-1 bg-black border border-white/20 font-mono text-[10px] text-white uppercase">
-                      #{room.tag}
-                    </span>
-                    <button className={`font-mono text-xs text-${room.theme} uppercase hover:text-white transition-colors`}>
-                      Join &gt;
-                    </button>
-                  </div>
-                  {/* Glitch hover effect */}
-                  <div className={`absolute inset-0 border-2 border-${room.theme} opacity-0 group-hover:opacity-50 group-hover:animate-ping pointer-events-none`} />
-                </div>
+              <View style={styles.sticker}>
+                <Text style={styles.stickerText}>Live Now</Text>
+              </View>
+              {VIBE_ROOMS.map((room) => (
+                <TouchableOpacity
+                  key={room.id}
+                  style={[styles.roomCard, { borderColor: room.themeColor }]}
+                >
+                  <View style={styles.roomHeader}>
+                    <Text style={[styles.roomName, { color: room.themeColor }]}>{room.name}</Text>
+                    <View style={styles.usersCount}>
+                      <Users size={12} color="rgba(255,255,255,0.5)" />
+                      <Text style={styles.usersText}>{room.users}</Text>
+                    </View>
+                  </View>
+                  <View style={styles.roomFooter}>
+                    <View style={styles.tagBox}>
+                      <Text style={styles.tagText}>#{room.tag}</Text>
+                    </View>
+                    <Text style={[styles.joinText, { color: room.themeColor }]}>Join &gt;</Text>
+                  </View>
+                </TouchableOpacity>
               ))}
-            </motion.div>
+            </MotiView>
           )}
 
           {activeTab === 'confessions' && (
-            <motion.div
+            <MotiView
               key="confessions"
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: 20 }}
-              className="space-y-6"
+              from={{ opacity: 0, translateX: 20 }}
+              animate={{ opacity: 1, translateX: 0 }}
+              exit={{ opacity: 0, translateX: 20 }}
+              transition={{ type: 'timing', duration: 300 }}
+              style={styles.listContainer}
             >
-              <button className="w-full py-4 border-2 border-white border-dashed text-white/70 font-marker text-lg hover:bg-white hover:text-black transition-colors flex items-center justify-center gap-2">
-                <EyeOff size={20} />
-                Confess Something...
-              </button>
+              <TouchableOpacity style={styles.confessBtn}>
+                <EyeOff size={20} color="rgba(255,255,255,0.7)" />
+                <Text style={styles.confessText}>Confess Something...</Text>
+              </TouchableOpacity>
 
-              <div className="space-y-4">
-                {CONFESSIONS.map((confession, i) => (
-                  <div key={confession.id} className="torn-paper bg-black text-white p-4 border-l-4 border-neon-pink">
-                    <p className="font-marker text-lg leading-tight mb-3">
-                      &quot;{confession.text}&quot;
-                    </p>
-                    <div className="flex justify-between items-center font-mono text-[10px] text-white/50">
-                      <span>Anonymous // {confession.time}</span>
-                      <div className="flex gap-3">
-                        <button className="hover:text-neon-pink transition-colors"><Flame size={14} /></button>
-                        <button className="hover:text-neon-cyan transition-colors"><MessageSquare size={14} /></button>
-                      </div>
-                    </div>
-                  </div>
+              <View style={styles.confessionsList}>
+                {CONFESSIONS.map((confession) => (
+                  <View key={confession.id} style={styles.confessionCard}>
+                    <Text style={styles.confessionText}>"{confession.text}"</Text>
+                    <View style={styles.confessionFooter}>
+                      <Text style={styles.confessionTime}>Anonymous // {confession.time}</Text>
+                      <View style={styles.confessionActions}>
+                        <TouchableOpacity>
+                          <Flame size={14} color="rgba(255,255,255,0.5)" />
+                        </TouchableOpacity>
+                        <TouchableOpacity>
+                          <MessageSquare size={14} color="rgba(255,255,255,0.5)" />
+                        </TouchableOpacity>
+                      </View>
+                    </View>
+                  </View>
                 ))}
-              </div>
-            </motion.div>
+              </View>
+            </MotiView>
           )}
         </AnimatePresence>
-      </div>
-    </div>
+      </ScrollView>
+    </View>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: '#050505',
+    paddingTop: 48,
+    paddingHorizontal: 16,
+    paddingBottom: 80, // for nav
+  },
+  header: {
+    marginBottom: 24,
+  },
+  headerTitle: {
+    fontSize: 32,
+    fontFamily: 'Anton',
+    color: 'white',
+    textTransform: 'uppercase',
+    letterSpacing: 2,
+    textShadowColor: '#FFFF00', // neon-yellow
+    textShadowOffset: { width: 2, height: 0 },
+    textShadowRadius: 1,
+  },
+  tabsContainer: {
+    flexDirection: 'row',
+    gap: 16,
+    marginBottom: 24,
+  },
+  tabBtn: {
+    flex: 1,
+    paddingVertical: 12,
+    borderWidth: 2,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  tabActiveRooms: {
+    backgroundColor: '#00FF41',
+    borderColor: '#00FF41',
+  },
+  tabActiveConfessions: {
+    backgroundColor: '#FF00FF',
+    borderColor: '#FF00FF',
+  },
+  tabInactive: {
+    backgroundColor: 'transparent',
+    borderColor: 'rgba(255,255,255,0.2)',
+  },
+  tabText: {
+    fontFamily: 'Anton',
+    fontSize: 20,
+    letterSpacing: 1,
+  },
+  contentContainer: {
+    flex: 1,
+  },
+  listContainer: {
+    paddingBottom: 24,
+  },
+  sticker: {
+    position: 'absolute',
+    top: -12,
+    right: 16,
+    backgroundColor: '#fff',
+    paddingHorizontal: 12,
+    paddingVertical: 4,
+    borderWidth: 2,
+    borderColor: '#00FFFF',
+    transform: [{ rotate: '12deg' }],
+    zIndex: 10,
+    shadowColor: '#000',
+    shadowOffset: { width: 4, height: 4 },
+    shadowOpacity: 1,
+    shadowRadius: 0,
+    elevation: 4,
+  },
+  stickerText: {
+    fontFamily: 'PermanentMarker',
+    fontSize: 12,
+    color: '#00FFFF',
+  },
+  roomCard: {
+    backgroundColor: '#1a1a1a',
+    borderWidth: 2,
+    padding: 16,
+    marginBottom: 16,
+  },
+  roomHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
+    marginBottom: 8,
+  },
+  roomName: {
+    fontFamily: 'Anton',
+    fontSize: 24,
+    textTransform: 'uppercase',
+    flex: 1,
+    paddingRight: 16,
+  },
+  usersCount: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+  },
+  usersText: {
+    fontFamily: 'JetBrainsMono',
+    fontSize: 12,
+    color: 'rgba(255,255,255,0.5)',
+  },
+  roomFooter: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-end',
+  },
+  tagBox: {
+    backgroundColor: '#000',
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.2)',
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+  },
+  tagText: {
+    fontFamily: 'JetBrainsMono',
+    fontSize: 10,
+    color: '#fff',
+    textTransform: 'uppercase',
+  },
+  joinText: {
+    fontFamily: 'JetBrainsMono',
+    fontSize: 12,
+    textTransform: 'uppercase',
+  },
+  confessBtn: {
+    width: '100%',
+    paddingVertical: 16,
+    borderWidth: 2,
+    borderColor: '#fff',
+    borderStyle: 'dashed',
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+    marginBottom: 24,
+  },
+  confessText: {
+    fontFamily: 'PermanentMarker',
+    fontSize: 18,
+    color: 'rgba(255,255,255,0.7)',
+  },
+  confessionsList: {
+    gap: 16,
+  },
+  confessionCard: {
+    backgroundColor: '#000',
+    padding: 16,
+    borderLeftWidth: 4,
+    borderLeftColor: '#FF00FF',
+    // torn-paper proxy
+    shadowColor: '#000',
+    shadowOffset: { width: 2, height: 2 },
+    shadowOpacity: 0.5,
+    shadowRadius: 10,
+    elevation: 5,
+  },
+  confessionText: {
+    fontFamily: 'PermanentMarker',
+    fontSize: 18,
+    color: '#fff',
+    lineHeight: 24,
+    marginBottom: 12,
+  },
+  confessionFooter: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  confessionTime: {
+    fontFamily: 'JetBrainsMono',
+    fontSize: 10,
+    color: 'rgba(255,255,255,0.5)',
+  },
+  confessionActions: {
+    flexDirection: 'row',
+    gap: 12,
+  },
+});

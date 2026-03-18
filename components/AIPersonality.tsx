@@ -1,8 +1,11 @@
-import { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'motion/react';
-import { X, ScanLine, BrainCircuit } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { View, Text, StyleSheet, TouchableOpacity, Dimensions } from 'react-native';
+import { MotiView, AnimatePresence } from 'moti';
+import { X, ScanLine, BrainCircuit } from 'lucide-react-native';
 
-export default function AIPersonality({ onClose }: { onClose: () => void }) {
+const { width } = Dimensions.get('window');
+
+export default function AIPersonality({ onClose }) {
   const [scanning, setScanning] = useState(true);
   const [progress, setProgress] = useState(0);
 
@@ -23,103 +26,287 @@ export default function AIPersonality({ onClose }: { onClose: () => void }) {
   }, [scanning]);
 
   return (
-    <motion.div
-      initial={{ opacity: 0, scale: 0.9 }}
+    <MotiView
+      from={{ opacity: 0, scale: 0.9 }}
       animate={{ opacity: 1, scale: 1 }}
       exit={{ opacity: 0, scale: 1.1 }}
-      className="fixed inset-0 bg-void-black/90 backdrop-blur-md z-50 flex flex-col items-center justify-center p-6"
+      transition={{ type: 'timing', duration: 300 }}
+      style={styles.container}
     >
-      <button 
-        onClick={onClose}
-        className="absolute top-6 right-6 text-white/50 hover:text-neon-pink transition-colors"
-      >
-        <X size={32} />
-      </button>
+      <TouchableOpacity onPress={onClose} style={styles.closeBtn}>
+        <X size={32} color="rgba(255,255,255,0.5)" />
+      </TouchableOpacity>
 
-      <AnimatePresence mode="wait">
+      <AnimatePresence exitBeforeEnter>
         {scanning ? (
-          <motion.div
+          <MotiView
             key="scanning"
-            initial={{ opacity: 0 }}
+            from={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            exit={{ opacity: 0, y: -50 }}
-            className="flex flex-col items-center w-full max-w-sm"
+            exit={{ opacity: 0, translateY: -50 }}
+            style={styles.contentContainer}
           >
-            <div className="relative w-48 h-48 mb-12">
-              <div className="absolute inset-0 border-4 border-neon-cyan rounded-full animate-ping opacity-20" />
-              <div className="absolute inset-4 border-4 border-neon-pink rounded-full animate-spin" style={{ animationDuration: '3s' }} />
-              <div className="absolute inset-0 flex items-center justify-center">
-                <ScanLine size={64} className="text-white flicker" />
-              </div>
-              {/* Scanning Line */}
-              <motion.div 
-                animate={{ y: [0, 192, 0] }}
-                transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
-                className="absolute top-0 left-0 right-0 h-1 bg-neon-green shadow-[0_0_15px_var(--color-neon-green)] z-10"
-              />
-            </div>
+            <View style={styles.scannerCircleContainer}>
+              <View style={[styles.circleOuter, styles.pingAnimation]} />
+              <View style={styles.circleInner} />
+              <ScanLine size={64} color="#fff" />
 
-            <h2 className="font-anton text-3xl text-white uppercase tracking-widest mb-4 glitch-text" data-text="ANALYZING CHAOS">
-              ANALYZING CHAOS
-            </h2>
-            
-            <div className="w-full h-2 bg-void-gray border border-white/20 relative overflow-hidden">
-              <motion.div 
-                className="absolute top-0 left-0 bottom-0 bg-neon-cyan"
-                initial={{ width: '0%' }}
-                animate={{ width: `${progress}%` }}
+              <MotiView
+                from={{ translateY: -96 }}
+                animate={{ translateY: 96 }}
+                transition={{
+                  type: 'timing',
+                  duration: 2000,
+                  loop: true,
+                }}
+                style={styles.scanLineBar}
               />
-            </div>
-            <p className="font-mono text-xs text-neon-cyan mt-2 uppercase tracking-widest self-end">
-              {progress}% // Extracting Vibe
-            </p>
-          </motion.div>
+            </View>
+
+            <Text style={styles.analyzingText}>ANALYZING CHAOS</Text>
+
+            <View style={styles.progressBarContainer}>
+              <View style={[styles.progressBar, { width: `${progress}%` }]} />
+            </View>
+            <Text style={styles.progressText}>{progress}% // Extracting Vibe</Text>
+          </MotiView>
         ) : (
-          <motion.div
+          <MotiView
             key="result"
-            initial={{ opacity: 0, y: 50 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="flex flex-col items-center w-full max-w-sm text-center"
+            from={{ opacity: 0, translateY: 50 }}
+            animate={{ opacity: 1, translateY: 0 }}
+            style={styles.contentContainer}
           >
-            <div className="sticker absolute top-20 -left-4 z-10 text-lg rotate-[-12deg] text-black border-black bg-neon-yellow">
-              SYSTEM DIAGNOSIS
-            </div>
+            <View style={styles.sticker}>
+              <Text style={styles.stickerText}>SYSTEM DIAGNOSIS</Text>
+            </View>
 
-            <BrainCircuit size={48} className="text-neon-pink mb-6 animate-pulse" />
-            
-            <h3 className="font-mono text-xs text-white/50 uppercase tracking-widest mb-2">
-              You Are A:
-            </h3>
-            
-            <div className="torn-paper bg-white text-black p-6 mb-8 w-full rotate-1 brutalist-border-pink">
-              <h2 className="font-anton text-4xl uppercase leading-none mb-4">
-                Softcore<br/>Nihilist
-              </h2>
-              <p className="font-marker text-lg leading-tight">
-                &quot;You pretend nothing matters, but you still curate your Spotify playlists like they&apos;re going in a museum.&quot;
-              </p>
-            </div>
+            <BrainCircuit size={48} color="#FF00FF" style={styles.brainIcon} />
 
-            <div className="grid grid-cols-2 gap-4 w-full mb-8">
-              <div className="border-2 border-neon-cyan p-3 bg-void-gray">
-                <p className="font-mono text-[10px] text-neon-cyan uppercase mb-1">Red Flag</p>
-                <p className="font-marker text-sm text-white">Ghosts when overwhelmed</p>
-              </div>
-              <div className="border-2 border-neon-green p-3 bg-void-gray">
-                <p className="font-mono text-[10px] text-neon-green uppercase mb-1">Green Flag</p>
-                <p className="font-marker text-sm text-white">Sends unhinged memes</p>
-              </div>
-            </div>
+            <Text style={styles.subText}>You Are A:</Text>
 
-            <button 
-              onClick={onClose}
-              className="w-full py-4 bg-neon-pink text-black font-anton text-xl uppercase tracking-wider brutalist-border hover:bg-white transition-colors"
-            >
-              Accept Fate
-            </button>
-          </motion.div>
+            <View style={styles.resultCard}>
+              <Text style={styles.resultTitle}>Softcore{'\n'}Nihilist</Text>
+              <Text style={styles.resultDesc}>
+                "You pretend nothing matters, but you still curate your Spotify playlists like they're going in a museum."
+              </Text>
+            </View>
+
+            <View style={styles.flagsContainer}>
+              <View style={[styles.flagBox, { borderColor: '#00FFFF' }]}>
+                <Text style={[styles.flagLabel, { color: '#00FFFF' }]}>Red Flag</Text>
+                <Text style={styles.flagText}>Ghosts when overwhelmed</Text>
+              </View>
+              <View style={[styles.flagBox, { borderColor: '#00FF41' }]}>
+                <Text style={[styles.flagLabel, { color: '#00FF41' }]}>Green Flag</Text>
+                <Text style={styles.flagText}>Sends unhinged memes</Text>
+              </View>
+            </View>
+
+            <TouchableOpacity onPress={onClose} style={styles.acceptBtn}>
+              <Text style={styles.acceptBtnText}>Accept Fate</Text>
+            </TouchableOpacity>
+          </MotiView>
         )}
       </AnimatePresence>
-    </motion.div>
+    </MotiView>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: 'rgba(5,5,5,0.9)',
+    zIndex: 50,
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: 24,
+  },
+  closeBtn: {
+    position: 'absolute',
+    top: 48,
+    right: 24,
+    zIndex: 60,
+  },
+  contentContainer: {
+    width: '100%',
+    maxWidth: 340,
+    alignItems: 'center',
+  },
+  scannerCircleContainer: {
+    width: 192,
+    height: 192,
+    position: 'relative',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 48,
+    overflow: 'hidden',
+  },
+  circleOuter: {
+    ...StyleSheet.absoluteFillObject,
+    borderWidth: 4,
+    borderColor: '#00FFFF',
+    borderRadius: 96,
+    opacity: 0.2,
+  },
+  pingAnimation: {
+    // simplified ping
+  },
+  circleInner: {
+    position: 'absolute',
+    top: 16,
+    left: 16,
+    right: 16,
+    bottom: 16,
+    borderWidth: 4,
+    borderColor: '#FF00FF',
+    borderRadius: 80,
+  },
+  scanLineBar: {
+    position: 'absolute',
+    left: 0,
+    right: 0,
+    height: 4,
+    backgroundColor: '#00FF41',
+    shadowColor: '#00FF41',
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 1,
+    shadowRadius: 15,
+    elevation: 5,
+    zIndex: 10,
+  },
+  analyzingText: {
+    fontFamily: 'Anton',
+    fontSize: 32,
+    color: '#fff',
+    textTransform: 'uppercase',
+    letterSpacing: 2,
+    marginBottom: 16,
+    textShadowColor: '#FF00FF',
+    textShadowOffset: { width: 2, height: 0 },
+    textShadowRadius: 1,
+  },
+  progressBarContainer: {
+    width: '100%',
+    height: 8,
+    backgroundColor: '#1a1a1a',
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.2)',
+    overflow: 'hidden',
+  },
+  progressBar: {
+    height: '100%',
+    backgroundColor: '#00FFFF',
+  },
+  progressText: {
+    fontFamily: 'JetBrainsMono',
+    fontSize: 12,
+    color: '#00FFFF',
+    textTransform: 'uppercase',
+    letterSpacing: 2,
+    marginTop: 8,
+    alignSelf: 'flex-end',
+  },
+  sticker: {
+    position: 'absolute',
+    top: 0,
+    left: -16,
+    zIndex: 10,
+    backgroundColor: '#FFFF00',
+    paddingHorizontal: 12,
+    paddingVertical: 4,
+    borderWidth: 2,
+    borderColor: '#000',
+    transform: [{ rotate: '-12deg' }],
+  },
+  stickerText: {
+    fontFamily: 'Inter',
+    fontWeight: 'bold',
+    fontSize: 14,
+    color: '#000',
+  },
+  brainIcon: {
+    marginBottom: 24,
+    marginTop: 24,
+  },
+  subText: {
+    fontFamily: 'JetBrainsMono',
+    fontSize: 12,
+    color: 'rgba(255,255,255,0.5)',
+    textTransform: 'uppercase',
+    letterSpacing: 2,
+    marginBottom: 8,
+  },
+  resultCard: {
+    backgroundColor: '#fff',
+    padding: 24,
+    width: '100%',
+    marginBottom: 32,
+    transform: [{ rotate: '1deg' }],
+    borderWidth: 2,
+    borderColor: '#fff',
+    shadowColor: '#FF00FF',
+    shadowOffset: { width: 4, height: 4 },
+    shadowOpacity: 1,
+    shadowRadius: 0,
+    elevation: 4,
+  },
+  resultTitle: {
+    fontFamily: 'Anton',
+    fontSize: 48,
+    color: '#000',
+    textTransform: 'uppercase',
+    lineHeight: 48,
+    marginBottom: 16,
+  },
+  resultDesc: {
+    fontFamily: 'PermanentMarker',
+    fontSize: 18,
+    color: '#000',
+    lineHeight: 24,
+  },
+  flagsContainer: {
+    flexDirection: 'row',
+    width: '100%',
+    gap: 16,
+    marginBottom: 32,
+  },
+  flagBox: {
+    flex: 1,
+    backgroundColor: '#1a1a1a',
+    borderWidth: 2,
+    padding: 12,
+  },
+  flagLabel: {
+    fontFamily: 'JetBrainsMono',
+    fontSize: 10,
+    textTransform: 'uppercase',
+    marginBottom: 4,
+  },
+  flagText: {
+    fontFamily: 'PermanentMarker',
+    fontSize: 14,
+    color: '#fff',
+  },
+  acceptBtn: {
+    width: '100%',
+    paddingVertical: 16,
+    backgroundColor: '#FF00FF',
+    borderWidth: 2,
+    borderColor: '#fff',
+    alignItems: 'center',
+    justifyContent: 'center',
+    shadowColor: '#00FF41',
+    shadowOffset: { width: 4, height: 4 },
+    shadowOpacity: 1,
+    shadowRadius: 0,
+    elevation: 4,
+  },
+  acceptBtnText: {
+    fontFamily: 'Anton',
+    fontSize: 20,
+    color: '#000',
+    textTransform: 'uppercase',
+    letterSpacing: 1,
+  },
+});

@@ -1,167 +1,416 @@
-import { useState } from 'react';
-import { motion, AnimatePresence } from 'motion/react';
-import { Settings, Edit3, LogOut, Camera, BrainCircuit, Flame, Trophy, Zap } from 'lucide-react';
-import Image from 'next/image';
+import React, { useState } from 'react';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, TextInput } from 'react-native';
+import { MotiView, AnimatePresence } from 'moti';
+import { LogOut, BrainCircuit, Edit2, Settings } from 'lucide-react-native';
+import { Image } from 'expo-image';
 import AIPersonality from './AIPersonality';
 
-export default function Profile({ chaosMode, setChaosMode }: { chaosMode: boolean, setChaosMode: (v: boolean) => void }) {
+export default function Profile({ chaosMode, setChaosMode }) {
   const [isEditing, setIsEditing] = useState(false);
   const [showAIScan, setShowAIScan] = useState(false);
 
   return (
-    <div className="absolute inset-0 bg-void-black z-30 overflow-y-auto pb-24 pt-12 px-4">
-      <header className="flex justify-between items-center mb-8">
-        <h1 className="text-3xl font-anton text-white uppercase tracking-widest glitch-text" data-text="ME">
-          ME
-        </h1>
-        <div className="flex gap-4">
-          <button 
-            onClick={() => setIsEditing(!isEditing)}
-            className="w-10 h-10 border-2 border-neon-yellow flex items-center justify-center text-neon-yellow hover:bg-neon-yellow hover:text-black transition-colors"
-          >
-            <Edit3 size={20} />
-          </button>
-          <button className="w-10 h-10 border-2 border-white/50 flex items-center justify-center text-white/50 hover:bg-white hover:text-black transition-colors">
-            <Settings size={20} />
-          </button>
-        </div>
-      </header>
+    <View style={styles.container}>
+      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
+        {/* Header */}
+        <View style={styles.header}>
+          <Text style={styles.headerTitle}>PROFILE</Text>
+          <TouchableOpacity onPress={() => setIsEditing(!isEditing)} style={styles.editBtn}>
+            <Edit2 size={20} color={isEditing ? '#00FF41' : '#fff'} />
+          </TouchableOpacity>
+        </View>
 
-      {/* Profile Header */}
-      <div className="relative mb-12">
-        <div className="w-32 h-32 mx-auto relative z-10">
-          <div className="absolute inset-0 border-4 border-neon-pink rotate-3 z-20 pointer-events-none" />
-          <div className="absolute inset-0 border-4 border-neon-cyan -rotate-3 z-0 pointer-events-none" />
-          <div className="w-full h-full overflow-hidden bg-void-gray relative z-10">
-            <Image src="https://picsum.photos/seed/me/200/200" alt="My Profile" fill className="object-cover grayscale contrast-125" referrerPolicy="no-referrer" />
-          </div>
-          {isEditing && (
-            <button className="absolute bottom-0 right-0 w-10 h-10 bg-neon-green text-black flex items-center justify-center z-30 brutalist-border hover:bg-white transition-colors">
-              <Camera size={20} />
-            </button>
-          )}
-        </div>
-        
-        <div className="text-center mt-6 relative z-10">
-          <h2 className="text-4xl font-anton uppercase text-white drop-shadow-[2px_2px_0_var(--color-neon-pink)]">
-            User_Name, <span className="text-2xl text-neon-yellow">23</span>
-          </h2>
-          <p className="font-mono text-xs text-neon-cyan uppercase tracking-widest mt-1">
-            Status: Online // Glitching
-          </p>
-        </div>
+        {/* Profile Card */}
+        <View style={styles.profileCard}>
+          <Image source={{ uri: 'https://picsum.photos/seed/user/400/400' }} style={styles.profileImage} contentFit="cover" />
+          <View style={styles.gradient} />
+          <View style={styles.profileInfo}>
+            <Text style={styles.nameText}>xX_ANGEL_Xx, 21</Text>
+            <View style={styles.statsRow}>
+              <View style={styles.statBox}>
+                <Text style={styles.statValue}>404</Text>
+                <Text style={styles.statLabel}>LIKES</Text>
+              </View>
+              <View style={styles.statBox}>
+                <Text style={styles.statValue}>666</Text>
+                <Text style={styles.statLabel}>MATCHES</Text>
+              </View>
+            </View>
+          </View>
+        </View>
 
-        {/* Decorative Stickers */}
-        <div className="sticker absolute top-0 left-4 rotate-[-15deg] z-20 text-sm text-neon-pink border-neon-pink">
-          100% RAW
-        </div>
-        <div className="sticker absolute bottom-4 right-4 rotate-[10deg] z-20 text-sm text-neon-green border-neon-green">
-          CHAOS
-        </div>
-      </div>
+        {/* AI Scanner Button */}
+        <TouchableOpacity onPress={() => setShowAIScan(true)} style={styles.aiBtn}>
+          <BrainCircuit size={24} color="#FF00FF" />
+          <Text style={styles.aiBtnText}>Run AI Vibe Scan</Text>
+        </TouchableOpacity>
 
-      {/* Gamification / Stats */}
-      <div className="grid grid-cols-3 gap-2 mb-8">
-        <div className="bg-void-gray border-2 border-neon-red p-3 flex flex-col items-center justify-center relative overflow-hidden group">
-          <Flame size={24} className="text-neon-red mb-1 group-hover:animate-ping" />
-          <span className="font-anton text-2xl text-white">14</span>
-          <span className="font-mono text-[9px] text-neon-red uppercase">Day Streak</span>
-          <div className="absolute inset-0 bg-neon-red/10 animate-pulse pointer-events-none" />
-        </div>
-        <div className="bg-void-gray border-2 border-neon-yellow p-3 flex flex-col items-center justify-center">
-          <Trophy size={24} className="text-neon-yellow mb-1" />
-          <span className="font-anton text-2xl text-white">LVL 7</span>
-          <span className="font-mono text-[9px] text-neon-yellow uppercase">Heartbreaker</span>
-        </div>
-        <div className="bg-void-gray border-2 border-neon-cyan p-3 flex flex-col items-center justify-center">
-          <Zap size={24} className="text-neon-cyan mb-1" />
-          <span className="font-anton text-2xl text-white">850</span>
-          <span className="font-mono text-[9px] text-neon-cyan uppercase">XP Points</span>
-        </div>
-      </div>
+        {/* Bio Section */}
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>BIO</Text>
+          <View style={styles.bioBox}>
+            {isEditing ? (
+              <TextInput
+                style={styles.bioInput}
+                multiline
+                defaultValue="I don't do small talk. Show me your weirdest playlist."
+              />
+            ) : (
+              <Text style={styles.bioText}>
+                I don't do small talk. Show me your weirdest playlist.
+              </Text>
+            )}
+          </View>
+        </View>
 
-      {/* AI Scanner Button */}
-      <button 
-        onClick={() => setShowAIScan(true)}
-        className="w-full py-4 mb-8 bg-black border-2 border-neon-pink text-neon-pink font-anton text-xl uppercase tracking-wider hover:bg-neon-pink hover:text-black transition-colors flex items-center justify-center gap-3 brutalist-border-pink relative overflow-hidden group"
-      >
-        <BrainCircuit size={24} className="group-hover:animate-spin" />
-        <span>Run AI Vibe Scan</span>
-        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-neon-pink/20 to-transparent -translate-x-full group-hover:animate-[shimmer_1.5s_infinite]" />
-      </button>
+        {/* Tags Section */}
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>VIBES</Text>
+          <View style={styles.tagsContainer}>
+            {['Cyberpunk', 'Late Nights', 'Noise Music', 'Coffee'].map((tag, i) => (
+              <View
+                key={tag}
+                style={[
+                  styles.tag,
+                  i % 2 === 0 ? styles.tagCyan : styles.tagPink,
+                ]}
+              >
+                <Text style={[styles.tagText, i % 2 === 0 ? { color: '#00FFFF' } : { color: '#FF00FF' }]}>
+                  {tag}
+                </Text>
+                {isEditing && <Text style={styles.tagRemove}> x</Text>}
+              </View>
+            ))}
+            {isEditing && (
+              <TouchableOpacity style={styles.addTagBtn}>
+                <Text style={styles.addTagText}>+ ADD VIBE</Text>
+              </TouchableOpacity>
+            )}
+          </View>
+        </View>
 
-      {/* Bio Section */}
-      <div className="mb-8 relative">
-        <h3 className="font-anton text-xl text-white/50 uppercase mb-2">Bio</h3>
-        <div className="torn-paper bg-white text-black p-6 rotate-1">
-          {isEditing ? (
-            <textarea 
-              className="w-full h-24 bg-transparent border-b-2 border-black border-dashed font-marker text-xl focus:outline-none resize-none"
-              defaultValue="I don't do small talk. Show me your weirdest playlist."
-            />
-          ) : (
-            <p className="font-marker text-xl leading-relaxed">
-              I don&apos;t do small talk. Show me your weirdest playlist.
-            </p>
-          )}
-        </div>
-      </div>
-
-      {/* Tags Section */}
-      <div className="mb-12">
-        <h3 className="font-anton text-xl text-white/50 uppercase mb-4">Vibes</h3>
-        <div className="flex flex-wrap gap-3">
-          {['Cyberpunk', 'Late Nights', 'Noise Music', 'Coffee'].map((tag, i) => (
-            <div 
-              key={tag} 
-              className={`px-4 py-2 border-2 font-mono text-sm uppercase ${
-                i % 2 === 0 ? 'border-neon-cyan text-neon-cyan -rotate-2' : 'border-neon-pink text-neon-pink rotate-2'
-              } ${isEditing ? 'cursor-pointer hover:bg-white hover:text-black transition-colors' : ''}`}
+        {/* Actions */}
+        <View style={styles.actionsContainer}>
+          {/* Chaos Mode Toggle */}
+          <View style={styles.chaosRow}>
+            <View>
+              <Text style={styles.chaosTitle}>CHAOS MODE</Text>
+              <Text style={styles.chaosSub}>WARNING: UNSTABLE UI</Text>
+            </View>
+            <TouchableOpacity
+              onPress={() => setChaosMode(!chaosMode)}
+              style={[styles.toggleBtn, chaosMode ? styles.toggleOn : styles.toggleOff]}
             >
-              {tag}
-              {isEditing && <span className="ml-2 text-xs">x</span>}
-            </div>
-          ))}
-          {isEditing && (
-            <button className="px-4 py-2 border-2 border-white border-dashed font-mono text-sm text-white uppercase hover:bg-white hover:text-black transition-colors">
-              + Add Vibe
-            </button>
-          )}
-        </div>
-      </div>
+              <View style={[styles.toggleThumb, chaosMode ? styles.thumbOn : styles.thumbOff]} />
+            </TouchableOpacity>
+          </View>
 
-      {/* Actions */}
-      <div className="space-y-4">
-        {/* Chaos Mode Toggle */}
-        <div className="flex items-center justify-between p-4 border-2 border-white/20 bg-void-gray">
-          <div>
-            <h4 className="font-anton text-lg text-white uppercase">Chaos Mode</h4>
-            <p className="font-mono text-[10px] text-white/50 uppercase">Warning: Unstable UI</p>
-          </div>
-          <button 
-            onClick={() => setChaosMode(!chaosMode)}
-            className={`w-14 h-8 border-2 flex items-center p-1 transition-colors ${
-              chaosMode ? 'border-neon-green bg-neon-green/20 justify-end' : 'border-white/50 bg-black justify-start'
-            }`}
-          >
-            <div className={`w-5 h-5 ${chaosMode ? 'bg-neon-green' : 'bg-white/50'}`} />
-          </button>
-        </div>
+          <TouchableOpacity style={styles.premiumBtn}>
+            <Text style={styles.premiumText}>GET PREMIUM</Text>
+            <View style={styles.premiumBadge}>
+              <Text style={styles.premiumBadgeText}>VOID+</Text>
+            </View>
+          </TouchableOpacity>
 
-        <button className="w-full py-4 bg-void-gray border-2 border-neon-yellow text-neon-yellow font-anton text-xl uppercase tracking-wider hover:bg-neon-yellow hover:text-black transition-colors flex items-center justify-center gap-2">
-          <span>Get Premium</span>
-          <span className="font-mono text-xs bg-neon-yellow text-black px-2 py-1 ml-2">VOID+</span>
-        </button>
-        
-        <button className="w-full py-4 bg-transparent border-2 border-white/20 text-white/50 font-anton text-xl uppercase tracking-wider hover:bg-neon-pink hover:text-black hover:border-neon-pink transition-colors flex items-center justify-center gap-2">
-          <LogOut size={20} />
-          <span>Disconnect</span>
-        </button>
-      </div>
+          <TouchableOpacity style={styles.disconnectBtn}>
+            <LogOut size={20} color="rgba(255,255,255,0.5)" />
+            <Text style={styles.disconnectText}>DISCONNECT</Text>
+          </TouchableOpacity>
+        </View>
+      </ScrollView>
 
       <AnimatePresence>
         {showAIScan && <AIPersonality onClose={() => setShowAIScan(false)} />}
       </AnimatePresence>
-    </div>
+    </View>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: '#050505',
+    paddingTop: 48,
+    paddingHorizontal: 16,
+    paddingBottom: 80, // for nav
+  },
+  scrollContent: {
+    paddingBottom: 24,
+  },
+  header: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 24,
+  },
+  headerTitle: {
+    fontSize: 32,
+    fontFamily: 'Anton',
+    color: 'white',
+    textTransform: 'uppercase',
+    letterSpacing: 2,
+    textShadowColor: '#FF00FF',
+    textShadowOffset: { width: 2, height: 0 },
+    textShadowRadius: 1,
+  },
+  editBtn: {
+    padding: 8,
+  },
+  profileCard: {
+    width: '100%',
+    aspectRatio: 1,
+    borderWidth: 2,
+    borderColor: '#fff',
+    backgroundColor: '#1a1a1a',
+    marginBottom: 24,
+    shadowColor: '#00FF41',
+    shadowOffset: { width: 4, height: 4 },
+    shadowOpacity: 1,
+    shadowRadius: 0,
+    elevation: 4,
+    overflow: 'hidden',
+  },
+  profileImage: {
+    ...StyleSheet.absoluteFillObject,
+    opacity: 0.8,
+  },
+  gradient: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: 'rgba(0,0,0,0.4)',
+  },
+  profileInfo: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    padding: 16,
+  },
+  nameText: {
+    fontFamily: 'Anton',
+    fontSize: 32,
+    color: '#fff',
+    textShadowColor: '#FF00FF',
+    textShadowOffset: { width: 2, height: 2 },
+    textShadowRadius: 1,
+    marginBottom: 8,
+  },
+  statsRow: {
+    flexDirection: 'row',
+    gap: 16,
+  },
+  statBox: {
+    backgroundColor: 'rgba(0,0,0,0.6)',
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.3)',
+  },
+  statValue: {
+    fontFamily: 'JetBrainsMono',
+    fontSize: 16,
+    color: '#00FFFF',
+    fontWeight: 'bold',
+  },
+  statLabel: {
+    fontFamily: 'JetBrainsMono',
+    fontSize: 10,
+    color: 'rgba(255,255,255,0.5)',
+  },
+  aiBtn: {
+    width: '100%',
+    paddingVertical: 16,
+    backgroundColor: '#000',
+    borderWidth: 2,
+    borderColor: '#FF00FF',
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 12,
+    marginBottom: 32,
+    shadowColor: '#FF00FF',
+    shadowOffset: { width: 4, height: 4 },
+    shadowOpacity: 1,
+    shadowRadius: 0,
+    elevation: 4,
+  },
+  aiBtnText: {
+    fontFamily: 'Anton',
+    fontSize: 20,
+    color: '#FF00FF',
+    letterSpacing: 1,
+    textTransform: 'uppercase',
+  },
+  section: {
+    marginBottom: 32,
+  },
+  sectionTitle: {
+    fontFamily: 'Anton',
+    fontSize: 20,
+    color: 'rgba(255,255,255,0.5)',
+    marginBottom: 8,
+  },
+  bioBox: {
+    backgroundColor: '#fff',
+    padding: 24,
+    shadowColor: '#000',
+    shadowOffset: { width: 2, height: 2 },
+    shadowOpacity: 0.5,
+    shadowRadius: 10,
+    elevation: 5,
+    transform: [{ rotate: '1deg' }],
+  },
+  bioText: {
+    fontFamily: 'PermanentMarker',
+    fontSize: 20,
+    color: '#000',
+    lineHeight: 28,
+  },
+  bioInput: {
+    fontFamily: 'PermanentMarker',
+    fontSize: 20,
+    color: '#000',
+    borderBottomWidth: 2,
+    borderBottomColor: '#000',
+    borderStyle: 'dashed',
+    minHeight: 80,
+    textAlignVertical: 'top',
+  },
+  tagsContainer: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 12,
+  },
+  tag: {
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderWidth: 2,
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  tagCyan: {
+    borderColor: '#00FFFF',
+    transform: [{ rotate: '-2deg' }],
+  },
+  tagPink: {
+    borderColor: '#FF00FF',
+    transform: [{ rotate: '2deg' }],
+  },
+  tagText: {
+    fontFamily: 'JetBrainsMono',
+    fontSize: 14,
+    textTransform: 'uppercase',
+  },
+  tagRemove: {
+    fontFamily: 'JetBrainsMono',
+    fontSize: 12,
+    marginLeft: 8,
+  },
+  addTagBtn: {
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderWidth: 2,
+    borderColor: '#fff',
+    borderStyle: 'dashed',
+  },
+  addTagText: {
+    fontFamily: 'JetBrainsMono',
+    fontSize: 14,
+    color: '#fff',
+    textTransform: 'uppercase',
+  },
+  actionsContainer: {
+    gap: 16,
+  },
+  chaosRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    padding: 16,
+    backgroundColor: '#1a1a1a',
+    borderWidth: 2,
+    borderColor: 'rgba(255,255,255,0.2)',
+  },
+  chaosTitle: {
+    fontFamily: 'Anton',
+    fontSize: 18,
+    color: '#fff',
+  },
+  chaosSub: {
+    fontFamily: 'JetBrainsMono',
+    fontSize: 10,
+    color: 'rgba(255,255,255,0.5)',
+  },
+  toggleBtn: {
+    width: 56,
+    height: 32,
+    borderWidth: 2,
+    padding: 4,
+    justifyContent: 'center',
+  },
+  toggleOff: {
+    borderColor: 'rgba(255,255,255,0.5)',
+    backgroundColor: '#000',
+    alignItems: 'flex-start',
+  },
+  toggleOn: {
+    borderColor: '#00FF41',
+    backgroundColor: 'rgba(0,255,65,0.2)',
+    alignItems: 'flex-end',
+  },
+  toggleThumb: {
+    width: 20,
+    height: 20,
+  },
+  thumbOff: {
+    backgroundColor: 'rgba(255,255,255,0.5)',
+  },
+  thumbOn: {
+    backgroundColor: '#00FF41',
+  },
+  premiumBtn: {
+    width: '100%',
+    paddingVertical: 16,
+    backgroundColor: '#1a1a1a',
+    borderWidth: 2,
+    borderColor: '#FFFF00',
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+  },
+  premiumText: {
+    fontFamily: 'Anton',
+    fontSize: 20,
+    color: '#FFFF00',
+    letterSpacing: 1,
+  },
+  premiumBadge: {
+    backgroundColor: '#FFFF00',
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    marginLeft: 8,
+  },
+  premiumBadgeText: {
+    fontFamily: 'JetBrainsMono',
+    fontSize: 12,
+    color: '#000',
+    fontWeight: 'bold',
+  },
+  disconnectBtn: {
+    width: '100%',
+    paddingVertical: 16,
+    backgroundColor: 'transparent',
+    borderWidth: 2,
+    borderColor: 'rgba(255,255,255,0.2)',
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+  },
+  disconnectText: {
+    fontFamily: 'Anton',
+    fontSize: 20,
+    color: 'rgba(255,255,255,0.5)',
+    letterSpacing: 1,
+  },
+});

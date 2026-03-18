@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, StyleSheet, SafeAreaView, Dimensions } from 'react-native';
+import { View, Text, StyleSheet, SafeAreaView, Dimensions, ActivityIndicator } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { useFonts } from 'expo-font';
 import { AnimatePresence } from 'moti';
@@ -35,9 +35,12 @@ export default function App() {
     }
   }, [currentScreen]);
 
-  if (!fontsLoaded) {
-    return <View style={styles.container} />; // Loading screen or nothing
-  }
+  const loadingOverlay = !fontsLoaded && (
+    <View style={styles.loadingContainer} pointerEvents="none">
+      <ActivityIndicator size="large" color="#00FF41" />
+      <Text style={styles.loadingText}>Initializing experience...</Text>
+    </View>
+  );
 
   const showNavigation = ['swipe', 'reels', 'chat', 'profile', 'vibes'].includes(currentScreen);
 
@@ -45,6 +48,7 @@ export default function App() {
     <SafeAreaView style={styles.container}>
       <StatusBar style="light" />
       <View style={[styles.main, chaosMode && styles.chaosMode]}>
+        {loadingOverlay}
 
         {/* Background Effects */}
         <View style={styles.gridContainer}>
@@ -90,5 +94,20 @@ const styles = StyleSheet.create({
   gridContainer: {
     ...StyleSheet.absoluteFillObject,
     opacity: 0.5,
+  },
+  loadingContainer: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: 'rgba(5, 5, 5, 0.9)',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingTop: 24,
+    gap: 12,
+  },
+  loadingText: {
+    marginTop: 16,
+    color: '#00FF41',
+    fontFamily: 'JetBrainsMono',
+    letterSpacing: 1.5,
+    textTransform: 'uppercase',
   }
 });

@@ -1,7 +1,10 @@
-import { useState } from 'react';
-import { motion, useMotionValue, useTransform, AnimatePresence } from 'motion/react';
-import { X, Heart, Zap } from 'lucide-react';
-import Image from 'next/image';
+import React, { useState, useRef } from 'react';
+import { View, Text, StyleSheet, Dimensions, Animated, PanResponder, TouchableOpacity } from 'react-native';
+import { X, Heart, Zap } from 'lucide-react-native';
+import { Image } from 'expo-image';
+import { AnimatePresence, MotiView } from 'moti';
+
+const { width } = Dimensions.get('window');
 
 const PROFILES = [
   {
@@ -32,151 +35,351 @@ const PROFILES = [
 
 export default function Swipe() {
   const [profiles, setProfiles] = useState(PROFILES);
-  const [action, setAction] = useState<'like' | 'nope' | 'super' | null>(null);
+  const [action, setAction] = useState(null);
 
-  const x = useMotionValue(0);
-  const rotate = useTransform(x, [-200, 200], [-10, 10]);
-  const opacity = useTransform(x, [-200, -100, 0, 100, 200], [0, 1, 1, 1, 0]);
-  
-  const likeOpacity = useTransform(x, [0, 100], [0, 1]);
-  const nopeOpacity = useTransform(x, [0, -100], [0, 1]);
+  const position = useRef(new Animated.ValueXY()).current;
 
-  const handleDragEnd = (event: any, info: any) => {
-    if (info.offset.x > 100) {
-      handleAction('like');
-    } else if (info.offset.x < -100) {
-      handleAction('nope');
-    }
-  };
+  const panResponder = useRef(
+    PanResponder.create({
+      onStartShouldSetPanResponder: () => true,
+      onPanResponderMove: (event, gesture) => {
+        position.setValue({ x: gesture.dx, y: gesture.dy });
+      },
+      onPanResponderRelease: (event, gesture) => {
+        if (gesture.dx > 120) {
+          handleSwipe('like');
+        } else if (gesture.dx < -120) {
+          handleSwipe('nope');
+        } else {
+          resetPosition();
+        }
+      },
+    })
+  ).current;
 
-  const handleAction = (type: 'like' | 'nope' | 'super') => {
+  const handleSwipe = (type) => {
     setAction(type);
-    setTimeout(() => {
+    Animated.timing(position, {
+      toValue: { x: type === 'like' ? width * 1.5 : -width * 1.5, y: type === 'super' ? -width * 1.5 : 0 },
+      duration: 300,
+      useNativeDriver: true,
+    }).start(() => {
       setProfiles((prev) => prev.slice(1));
       setAction(null);
-      x.set(0);
-    }, 400);
+      position.setValue({ x: 0, y: 0 });
+    });
+  };
+
+  const forceAction = (type) => {
+    handleSwipe(type);
+  };
+
+  const resetPosition = () => {
+    Animated.spring(position, {
+      toValue: { x: 0, y: 0 },
+      useNativeDriver: true,
+    }).start();
+  };
+
+  const getCardStyle = () => {
+    const rotate = position.x.interpolate({
+      inputRange: [-width / 2, 0, width / 2],
+      outputRange: ['-10deg', '0deg', '10deg'],
+      extrapolate: 'clamp',
+    });
+
+    return {
+      ...position.getLayout(),
+      transform: [{ rotate }],
+    };
+  };
+
+  const getLikeOpacity = () => {
+    return position.x.interpolate({
+      inputRange: [0, width / 4],
+      outputRange: [0, 1],
+      extrapolate: 'clamp',
+    });
+  };
+
+  const getNopeOpacity = () => {
+    return position.x.interpolate({
+      inputRange: [-width / 4, 0],
+      outputRange: [1, 0],
+      extrapolate: 'clamp',
+    });
+  };
+
+  const renderCard = () => {
+    if (profiles.length === 0) {
+      return (
+        <View style={styles.noMoreContainer}>
+          <Text style={styles.noMoreText}>NO MORE HUMANS</Text>
+          <Text style={styles.noMoreSub}>Searching the void...</Text>
+        </View>
+      );
+    }
+
+    const profile = profiles[0];
+
+    return (
+      <Animated.View
+        {...panResponder.panHandlers}
+        style={[styles.card, getCardStyle()]}
+      >
+        <Image source={{ uri: profile.image }} style={styles.image} contentFit="cover" />
+        <View style={styles.gradient} />
+
+        {/* Labels */}
+        <Animated.View style={[styles.likeLabelContainer, { opacity: getLikeOpacity() }]}>
+          <Text style={styles.likeLabel}>LIKE</Text>
+        </Animated.View>
+        <Animated.View style={[styles.nopeLabelContainer, { opacity: getNopeOpacity() }]}>
+          <Text style={styles.nopeLabel}>NOPE</Text>
+        </Animated.View>
+
+        {/* Action Animation Overlay */}
+        {action === 'like' && (
+          <View style={[styles.actionOverlay, { backgroundColor: 'rgba(0, 255, 65, 0.2)' }]}>
+            <Heart size={100} color="#00FF41" fill="#00FF41" />
+          </View>
+        )}
+        {action === 'nope' && (
+          <View style={[styles.actionOverlay, { backgroundColor: 'rgba(255, 0, 255, 0.2)' }]}>
+            <X size={100} color="#FF00FF" />
+          </View>
+        )}
+        {action === 'super' && (
+          <View style={[styles.actionOverlay, { backgroundColor: 'rgba(0, 255, 255, 0.2)' }]}>
+            <Zap size={100} color="#00FFFF" fill="#00FFFF" />
+          </View>
+        )}
+
+        <View style={styles.infoContainer}>
+          <Text style={styles.nameText}>{profile.name}, <Text style={styles.ageText}>{profile.age}</Text></Text>
+          <Text style={styles.bioText}>"{profile.bio}"</Text>
+          <View style={styles.tagsContainer}>
+            {profile.tags.map(tag => (
+              <View key={tag} style={styles.tag}>
+                <Text style={styles.tagText}>{tag}</Text>
+              </View>
+            ))}
+          </View>
+        </View>
+      </Animated.View>
+    );
   };
 
   return (
-    <div className="absolute inset-0 pb-20 pt-12 px-4 flex flex-col z-30">
-      <header className="flex justify-between items-center mb-6">
-        <h1 className="text-3xl font-anton text-white uppercase tracking-widest glitch-text" data-text="VOID">
-          VOID
-        </h1>
-        <button className="w-10 h-10 border-2 border-neon-cyan flex items-center justify-center text-neon-cyan hover:bg-neon-cyan hover:text-black transition-colors">
-          <Zap size={20} />
-        </button>
-      </header>
+    <View style={styles.container}>
+      <View style={styles.header}>
+        <Text style={styles.headerTitle}>VOID</Text>
+        <TouchableOpacity style={styles.headerBtn}>
+          <Zap size={20} color="#00FFFF" />
+        </TouchableOpacity>
+      </View>
 
-      <div className="relative flex-1 flex items-center justify-center">
-        <AnimatePresence>
-          {profiles.length > 0 ? (
-            <motion.div
-              key={profiles[0].id}
-              style={{ x, rotate, opacity }}
-              drag="x"
-              dragConstraints={{ left: 0, right: 0 }}
-              onDragEnd={handleDragEnd}
-              initial={{ scale: 0.95, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              exit={{ 
-                x: action === 'like' ? 300 : action === 'nope' ? -300 : 0,
-                y: action === 'super' ? -300 : 0,
-                opacity: 0,
-                scale: 0.9,
-                rotate: action === 'like' ? 15 : action === 'nope' ? -15 : 0
-              }}
-              transition={{ duration: 0.3 }}
-              className="absolute w-full max-w-[340px] aspect-[3/4] bg-void-gray brutalist-border overflow-hidden cursor-grab active:cursor-grabbing"
-            >
-              {/* Image */}
-              <div className="absolute inset-0">
-                <Image
-                  src={profiles[0].image}
-                  alt={profiles[0].name}
-                  fill
-                  className="object-cover grayscale contrast-125 brightness-75 mix-blend-luminosity"
-                  referrerPolicy="no-referrer"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent" />
-                <div className="scanlines opacity-50" />
-              </div>
+      <View style={styles.cardsContainer}>
+        {renderCard()}
+      </View>
 
-              {/* Overlays */}
-              <motion.div style={{ opacity: likeOpacity }} className="absolute top-8 left-8 z-20 border-4 border-neon-green text-neon-green font-anton text-4xl p-2 rotate-[-15deg] uppercase">
-                LIKE
-              </motion.div>
-              <motion.div style={{ opacity: nopeOpacity }} className="absolute top-8 right-8 z-20 border-4 border-neon-pink text-neon-pink font-anton text-4xl p-2 rotate-[15deg] uppercase">
-                NOPE
-              </motion.div>
-
-              {/* Action Animations */}
-              {action === 'like' && (
-                <div className="absolute inset-0 flex items-center justify-center z-30 bg-neon-green/20 backdrop-blur-sm">
-                  <Heart size={100} className="text-neon-green fill-neon-green animate-ping" />
-                </div>
-              )}
-              {action === 'nope' && (
-                <div className="absolute inset-0 flex items-center justify-center z-30 bg-neon-pink/20 backdrop-blur-sm">
-                  <X size={100} className="text-neon-pink animate-pulse" />
-                </div>
-              )}
-              {action === 'super' && (
-                <div className="absolute inset-0 flex items-center justify-center z-30 bg-neon-cyan/20 backdrop-blur-sm">
-                  <Zap size={100} className="text-neon-cyan fill-neon-cyan animate-bounce" />
-                </div>
-              )}
-
-              {/* Info */}
-              <div className="absolute bottom-0 left-0 right-0 p-6 z-10">
-                <div className="flex items-end justify-between mb-2">
-                  <h2 className="text-4xl font-anton uppercase text-white drop-shadow-[2px_2px_0_var(--color-neon-pink)]">
-                    {profiles[0].name}, <span className="text-2xl text-neon-yellow">{profiles[0].age}</span>
-                  </h2>
-                </div>
-                <p className="font-marker text-lg text-white/90 leading-tight mb-4">
-                  &quot;{profiles[0].bio}&quot;
-                </p>
-                <div className="flex flex-wrap gap-2">
-                  {profiles[0].tags.map(tag => (
-                    <span key={tag} className="px-2 py-1 bg-black border border-white/30 font-mono text-xs text-neon-cyan uppercase">
-                      {tag}
-                    </span>
-                  ))}
-                </div>
-              </div>
-            </motion.div>
-          ) : (
-            <div className="text-center font-mono text-white/50">
-              <p className="text-2xl font-anton text-neon-pink mb-2">NO MORE HUMANS</p>
-              <p className="text-xs uppercase tracking-widest">Searching the void...</p>
-            </div>
-          )}
-        </AnimatePresence>
-      </div>
-
-      {/* Controls */}
-      <div className="flex justify-center items-center gap-6 mt-6">
-        <button 
-          onClick={() => handleAction('nope')}
-          className="w-16 h-16 rounded-full border-2 border-neon-pink flex items-center justify-center text-neon-pink hover:bg-neon-pink hover:text-black transition-colors"
-        >
-          <X size={32} strokeWidth={3} />
-        </button>
-        <button 
-          onClick={() => handleAction('super')}
-          className="w-12 h-12 rounded-full border-2 border-neon-cyan flex items-center justify-center text-neon-cyan hover:bg-neon-cyan hover:text-black transition-colors"
-        >
-          <Zap size={24} strokeWidth={3} />
-        </button>
-        <button 
-          onClick={() => handleAction('like')}
-          className="w-16 h-16 rounded-full border-2 border-neon-green flex items-center justify-center text-neon-green hover:bg-neon-green hover:text-black transition-colors"
-        >
-          <Heart size={32} strokeWidth={3} />
-        </button>
-      </div>
-    </div>
+      <View style={styles.controls}>
+        <TouchableOpacity onPress={() => forceAction('nope')} style={[styles.controlBtn, { borderColor: '#FF00FF' }]}>
+          <X size={32} color="#FF00FF" strokeWidth={3} />
+        </TouchableOpacity>
+        <TouchableOpacity onPress={() => forceAction('super')} style={[styles.controlBtnSmall, { borderColor: '#00FFFF' }]}>
+          <Zap size={24} color="#00FFFF" strokeWidth={3} />
+        </TouchableOpacity>
+        <TouchableOpacity onPress={() => forceAction('like')} style={[styles.controlBtn, { borderColor: '#00FF41' }]}>
+          <Heart size={32} color="#00FF41" strokeWidth={3} />
+        </TouchableOpacity>
+      </View>
+    </View>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    ...StyleSheet.absoluteFillObject,
+    paddingBottom: 80, // for nav
+    paddingTop: 48,
+    paddingHorizontal: 16,
+    zIndex: 30,
+    backgroundColor: 'transparent',
+  },
+  header: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 24,
+  },
+  headerTitle: {
+    fontSize: 32,
+    fontFamily: 'Anton',
+    color: 'white',
+    textTransform: 'uppercase',
+    letterSpacing: 2,
+  },
+  headerBtn: {
+    width: 40,
+    height: 40,
+    borderWidth: 2,
+    borderColor: '#00FFFF',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  cardsContainer: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  card: {
+    position: 'absolute',
+    width: '100%',
+    maxWidth: 340,
+    aspectRatio: 3 / 4,
+    backgroundColor: '#1a1a1a', // void-gray
+    borderWidth: 2,
+    borderColor: '#fff',
+    shadowColor: '#00FF41', // neon-green
+    shadowOffset: { width: 4, height: 4 },
+    shadowOpacity: 1,
+    shadowRadius: 0,
+    elevation: 8,
+    overflow: 'hidden',
+  },
+  image: {
+    ...StyleSheet.absoluteFillObject,
+    // grayscale, contrast etc. require expo-image or specific processing, simple cover for now
+    opacity: 0.8,
+  },
+  gradient: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: 'rgba(0,0,0,0.4)', // Simple gradient substitute
+  },
+  likeLabelContainer: {
+    position: 'absolute',
+    top: 32,
+    left: 32,
+    zIndex: 20,
+    borderWidth: 4,
+    borderColor: '#00FF41',
+    padding: 8,
+    transform: [{ rotate: '-15deg' }],
+  },
+  likeLabel: {
+    color: '#00FF41',
+    fontFamily: 'Anton',
+    fontSize: 32,
+    textTransform: 'uppercase',
+  },
+  nopeLabelContainer: {
+    position: 'absolute',
+    top: 32,
+    right: 32,
+    zIndex: 20,
+    borderWidth: 4,
+    borderColor: '#FF00FF',
+    padding: 8,
+    transform: [{ rotate: '15deg' }],
+  },
+  nopeLabel: {
+    color: '#FF00FF',
+    fontFamily: 'Anton',
+    fontSize: 32,
+    textTransform: 'uppercase',
+  },
+  actionOverlay: {
+    ...StyleSheet.absoluteFillObject,
+    alignItems: 'center',
+    justifyContent: 'center',
+    zIndex: 30,
+  },
+  infoContainer: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    padding: 24,
+    zIndex: 10,
+  },
+  nameText: {
+    fontSize: 36,
+    fontFamily: 'Anton',
+    color: '#ffffff',
+    textTransform: 'uppercase',
+    textShadowColor: '#FF00FF',
+    textShadowOffset: { width: 2, height: 2 },
+    textShadowRadius: 1,
+    marginBottom: 8,
+  },
+  ageText: {
+    fontSize: 24,
+    color: '#FFFF00', // neon-yellow
+  },
+  bioText: {
+    fontFamily: 'PermanentMarker',
+    fontSize: 18,
+    color: 'rgba(255, 255, 255, 0.9)',
+    marginBottom: 16,
+  },
+  tagsContainer: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 8,
+  },
+  tag: {
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    backgroundColor: '#000',
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.3)',
+  },
+  tagText: {
+    fontFamily: 'JetBrainsMono',
+    fontSize: 12,
+    color: '#00FFFF', // neon-cyan
+    textTransform: 'uppercase',
+  },
+  noMoreContainer: {
+    alignItems: 'center',
+  },
+  noMoreText: {
+    fontSize: 24,
+    fontFamily: 'Anton',
+    color: '#FF00FF',
+    marginBottom: 8,
+  },
+  noMoreSub: {
+    fontSize: 12,
+    fontFamily: 'JetBrainsMono',
+    color: 'rgba(255, 255, 255, 0.5)',
+    textTransform: 'uppercase',
+    letterSpacing: 2,
+  },
+  controls: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    gap: 24,
+    marginTop: 24,
+  },
+  controlBtn: {
+    width: 64,
+    height: 64,
+    borderRadius: 32,
+    borderWidth: 2,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: 'transparent',
+  },
+  controlBtnSmall: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    borderWidth: 2,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: 'transparent',
+  },
+});

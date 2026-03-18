@@ -1,8 +1,11 @@
-import { useState } from 'react';
-import { motion, AnimatePresence } from 'motion/react';
-import { X } from 'lucide-react';
+import React, { useState } from 'react';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, Dimensions } from 'react-native';
+import { MotiView, AnimatePresence } from 'moti';
+import { LinearGradient } from 'expo-linear-gradient';
 
-export default function Onboarding({ onComplete }: { onComplete: () => void }) {
+const { width } = Dimensions.get('window');
+
+export default function Onboarding({ onComplete }) {
   const [step, setStep] = useState(0);
 
   const nextStep = () => {
@@ -11,162 +14,300 @@ export default function Onboarding({ onComplete }: { onComplete: () => void }) {
   };
 
   return (
-    <motion.div
-      initial={{ opacity: 0, scale: 0.9 }}
+    <MotiView
+      from={{ opacity: 0, scale: 0.9 }}
       animate={{ opacity: 1, scale: 1 }}
-      exit={{ opacity: 0, y: -50 }}
-      className="absolute inset-0 bg-transparent flex flex-col z-40 p-6 items-center justify-center"
+      exit={{ opacity: 0, translateY: -50 }}
+      transition={{ type: 'timing', duration: 300 }}
+      style={styles.container}
     >
-      <AnimatePresence mode="wait">
+      <AnimatePresence exitBeforeEnter>
         {step === 0 && (
-          <motion.div
+          <MotiView
             key="step0"
-            initial={{ opacity: 0, scale: 0.8 }}
+            from={{ opacity: 0, scale: 0.8 }}
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.8 }}
-            className="y2k-panel w-full max-w-sm shadow-[8px_8px_0_rgba(0,0,0,0.5)]"
+            transition={{ type: 'timing', duration: 300 }}
+            style={styles.panel}
           >
-            <div className="y2k-titlebar">
-              <span>CYBER_LUV.exe</span>
-              <button className="y2k-panel-inset px-1 bg-silver text-black font-bold">X</button>
-            </div>
-            <div className="p-6 flex flex-col items-center text-center">
-              <h1 className="text-4xl font-anton uppercase text-y2k-pink leading-none tracking-tighter mb-4 y2k-chrome-text">
-                Welcome<br />To<br />2000
-              </h1>
-              <p className="font-mono text-black text-sm mb-8">
+            <LinearGradient colors={['#000080', '#1084d0']} start={{x:0, y:0}} end={{x:1, y:0}} style={styles.titlebar}>
+              <Text style={styles.titleText}>CYBER_LUV.exe</Text>
+              <TouchableOpacity style={styles.closeBtn}>
+                <Text style={styles.closeBtnText}>X</Text>
+              </TouchableOpacity>
+            </LinearGradient>
+            <View style={styles.content}>
+              <Text style={styles.headerText}>
+                Welcome{'\n'}To{'\n'}2000
+              </Text>
+              <Text style={styles.warningText}>
                 Warning: High levels of aesthetic detected. Proceed?
-              </p>
-              <button
-                onClick={nextStep}
-                className="w-full py-2 y2k-panel text-black font-bold uppercase tracking-wider hover:bg-white active:y2k-panel-inset transition-colors"
-              >
-                OK
-              </button>
-            </div>
-          </motion.div>
+              </Text>
+              <TouchableOpacity onPress={nextStep} style={styles.button}>
+                <Text style={styles.buttonText}>OK</Text>
+              </TouchableOpacity>
+            </View>
+          </MotiView>
         )}
 
         {step === 1 && (
-          <motion.div
+          <MotiView
             key="step1"
-            initial={{ opacity: 0, scale: 0.8 }}
+            from={{ opacity: 0, scale: 0.8 }}
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.8 }}
-            className="y2k-panel w-full max-w-sm shadow-[8px_8px_0_rgba(0,0,0,0.5)]"
+            transition={{ type: 'timing', duration: 300 }}
+            style={styles.panel}
           >
-            <div className="y2k-titlebar">
-              <span>Identify_Yourself.dll</span>
-              <button className="y2k-panel-inset px-1 bg-silver text-black font-bold">X</button>
-            </div>
-            <div className="p-6 flex flex-col justify-center">
-              <div className="space-y-4">
-                <div>
-                  <label className="block font-sans font-bold text-xs mb-1">Screen Name:</label>
-                  <input
-                    type="text"
-                    placeholder="xX_angel_Xx"
-                    className="w-full y2k-panel-inset p-2 font-mono text-black focus:outline-none"
-                  />
-                </div>
-                <div>
-                  <label className="block font-sans font-bold text-xs mb-1">Password:</label>
-                  <input
-                    type="password"
-                    placeholder="••••••••"
-                    className="w-full y2k-panel-inset p-2 font-mono text-black focus:outline-none"
-                  />
-                </div>
-              </div>
-              <div className="flex justify-end gap-2 mt-8">
-                <button className="py-1 px-4 y2k-panel text-black font-bold active:y2k-panel-inset">
-                  Cancel
-                </button>
-                <button
-                  onClick={nextStep}
-                  className="py-1 px-4 y2k-panel text-black font-bold active:y2k-panel-inset"
-                >
-                  Connect
-                </button>
-              </div>
-            </div>
-          </motion.div>
+            <LinearGradient colors={['#000080', '#1084d0']} start={{x:0, y:0}} end={{x:1, y:0}} style={styles.titlebar}>
+              <Text style={styles.titleText}>Identify_Yourself.dll</Text>
+              <TouchableOpacity style={styles.closeBtn}>
+                <Text style={styles.closeBtnText}>X</Text>
+              </TouchableOpacity>
+            </LinearGradient>
+            <View style={styles.content}>
+              <View style={styles.inputGroup}>
+                <Text style={styles.label}>Screen Name:</Text>
+                <TextInput style={styles.input} placeholderTextColor="#666" placeholder="xX_angel_Xx" />
+              </View>
+              <View style={styles.inputGroup}>
+                <Text style={styles.label}>Password:</Text>
+                <TextInput style={styles.input} placeholderTextColor="#666" placeholder="••••••••" secureTextEntry />
+              </View>
+              <View style={styles.buttonRow}>
+                <TouchableOpacity style={[styles.button, styles.btnSmall]}>
+                  <Text style={styles.buttonText}>Cancel</Text>
+                </TouchableOpacity>
+                <TouchableOpacity onPress={nextStep} style={[styles.button, styles.btnSmall]}>
+                  <Text style={styles.buttonText}>Connect</Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+          </MotiView>
         )}
 
         {step === 2 && (
-          <motion.div
+          <MotiView
             key="step2"
-            initial={{ opacity: 0, scale: 0.8 }}
+            from={{ opacity: 0, scale: 0.8 }}
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.8 }}
-            className="y2k-panel w-full max-w-sm shadow-[8px_8px_0_rgba(0,0,0,0.5)]"
+            transition={{ type: 'timing', duration: 300 }}
+            style={styles.panel}
           >
-            <div className="y2k-titlebar y2k-titlebar-pink">
-              <span>A/S/L Check</span>
-              <button className="y2k-panel-inset px-1 bg-silver text-black font-bold">X</button>
-            </div>
-            <div className="p-6 flex flex-col justify-center">
-              <div className="space-y-6">
-                <div>
-                  <p className="font-sans font-bold text-sm mb-1">Name:</p>
-                  <input
-                    type="text"
-                    className="w-full y2k-panel-inset p-2 font-mono text-black focus:outline-none"
-                    placeholder="Real Name"
-                  />
-                </div>
-                <div>
-                  <p className="font-sans font-bold text-sm mb-1">Age:</p>
-                  <input
-                    type="number"
-                    className="w-24 y2k-panel-inset p-2 font-mono text-black focus:outline-none"
-                    placeholder="21"
-                  />
-                </div>
-              </div>
-              <button
-                onClick={nextStep}
-                className="mt-8 w-full py-2 y2k-panel text-black font-bold uppercase tracking-wider active:y2k-panel-inset"
-              >
-                Next &gt;
-              </button>
-            </div>
-          </motion.div>
+            <LinearGradient colors={['#800040', '#ff007f']} start={{x:0, y:0}} end={{x:1, y:0}} style={styles.titlebar}>
+              <Text style={styles.titleText}>A/S/L Check</Text>
+              <TouchableOpacity style={styles.closeBtn}>
+                <Text style={styles.closeBtnText}>X</Text>
+              </TouchableOpacity>
+            </LinearGradient>
+            <View style={styles.content}>
+              <View style={styles.inputGroup}>
+                <Text style={styles.label}>Name:</Text>
+                <TextInput style={styles.input} placeholderTextColor="#666" placeholder="Real Name" />
+              </View>
+              <View style={styles.inputGroup}>
+                <Text style={styles.label}>Age:</Text>
+                <TextInput style={[styles.input, { width: 100 }]} placeholderTextColor="#666" placeholder="21" keyboardType="numeric" />
+              </View>
+              <TouchableOpacity onPress={nextStep} style={[styles.button, { marginTop: 32 }]}>
+                <Text style={styles.buttonText}>Next &gt;</Text>
+              </TouchableOpacity>
+            </View>
+          </MotiView>
         )}
 
         {step === 3 && (
-          <motion.div
+          <MotiView
             key="step3"
-            initial={{ opacity: 0, scale: 0.8 }}
+            from={{ opacity: 0, scale: 0.8 }}
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.8 }}
-            className="y2k-panel w-full max-w-sm shadow-[8px_8px_0_rgba(0,0,0,0.5)]"
+            transition={{ type: 'timing', duration: 300 }}
+            style={styles.panel}
           >
-            <div className="y2k-titlebar">
-              <span>Select_Aesthetic.exe</span>
-              <button className="y2k-panel-inset px-1 bg-silver text-black font-bold">X</button>
-            </div>
-            <div className="p-6 flex flex-col justify-center">
-              <div className="grid grid-cols-2 gap-2">
-                {['Cyber', 'Bling', 'Pop Punk', 'Frutiger Aero', 'Scene', 'Goth'].map((vibe, i) => (
-                  <button
-                    key={vibe}
-                    className="p-2 font-sans font-bold text-xs y2k-panel active:y2k-panel-inset hover:bg-y2k-pink hover:text-white transition-colors"
-                  >
-                    {vibe}
-                  </button>
+            <LinearGradient colors={['#000080', '#1084d0']} start={{x:0, y:0}} end={{x:1, y:0}} style={styles.titlebar}>
+              <Text style={styles.titleText}>Select_Aesthetic.exe</Text>
+              <TouchableOpacity style={styles.closeBtn}>
+                <Text style={styles.closeBtnText}>X</Text>
+              </TouchableOpacity>
+            </LinearGradient>
+            <View style={styles.content}>
+              <View style={styles.grid}>
+                {['Cyber', 'Bling', 'Pop Punk', 'Frutiger Aero', 'Scene', 'Goth'].map((vibe) => (
+                  <TouchableOpacity key={vibe} style={styles.gridItem}>
+                    <Text style={styles.gridItemText}>{vibe}</Text>
+                  </TouchableOpacity>
                 ))}
-              </div>
-              <button
-                onClick={nextStep}
-                className="mt-8 w-full py-2 y2k-panel text-black font-bold uppercase tracking-wider active:y2k-panel-inset"
-              >
-                Finish Setup
-              </button>
-            </div>
-          </motion.div>
+              </View>
+              <TouchableOpacity onPress={nextStep} style={[styles.button, { marginTop: 32 }]}>
+                <Text style={styles.buttonText}>Finish Setup</Text>
+              </TouchableOpacity>
+            </View>
+          </MotiView>
         )}
       </AnimatePresence>
-    </motion.div>
+    </MotiView>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: 'transparent',
+    zIndex: 40,
+    padding: 24,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  panel: {
+    width: '100%',
+    maxWidth: 384,
+    backgroundColor: '#c0c0c0', // y2k-silver
+    borderTopWidth: 2,
+    borderLeftWidth: 2,
+    borderRightWidth: 2,
+    borderBottomWidth: 2,
+    borderTopColor: '#ffffff',
+    borderLeftColor: '#ffffff',
+    borderRightColor: '#808080',
+    borderBottomColor: '#808080',
+    shadowColor: '#000',
+    shadowOffset: { width: 8, height: 8 },
+    shadowOpacity: 0.5,
+    shadowRadius: 0,
+    elevation: 5,
+  },
+  titlebar: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+  },
+  titleText: {
+    color: '#ffffff',
+    fontFamily: 'Inter',
+    fontWeight: 'bold',
+    fontSize: 14,
+    letterSpacing: 0.5,
+  },
+  closeBtn: {
+    backgroundColor: '#ffffff',
+    borderTopWidth: 2,
+    borderLeftWidth: 2,
+    borderRightWidth: 2,
+    borderBottomWidth: 2,
+    borderTopColor: '#808080',
+    borderLeftColor: '#808080',
+    borderRightColor: '#ffffff',
+    borderBottomColor: '#ffffff',
+    paddingHorizontal: 4,
+  },
+  closeBtnText: {
+    color: '#000',
+    fontWeight: 'bold',
+  },
+  content: {
+    padding: 24,
+  },
+  headerText: {
+    fontSize: 36,
+    fontFamily: 'Anton',
+    textTransform: 'uppercase',
+    color: '#FF007F', // y2k-pink
+    textAlign: 'center',
+    marginBottom: 16,
+    // Note: Chrome text effect difficult in plain RN, using solid pink
+  },
+  warningText: {
+    fontFamily: 'JetBrainsMono',
+    color: '#000',
+    fontSize: 14,
+    textAlign: 'center',
+    marginBottom: 32,
+  },
+  button: {
+    width: '100%',
+    paddingVertical: 8,
+    backgroundColor: '#c0c0c0',
+    borderTopWidth: 2,
+    borderLeftWidth: 2,
+    borderRightWidth: 2,
+    borderBottomWidth: 2,
+    borderTopColor: '#ffffff',
+    borderLeftColor: '#ffffff',
+    borderRightColor: '#808080',
+    borderBottomColor: '#808080',
+    alignItems: 'center',
+  },
+  buttonText: {
+    color: '#000',
+    fontWeight: 'bold',
+    textTransform: 'uppercase',
+    letterSpacing: 1,
+  },
+  inputGroup: {
+    marginBottom: 16,
+  },
+  label: {
+    fontFamily: 'Inter',
+    fontWeight: 'bold',
+    fontSize: 12,
+    color: '#000',
+    marginBottom: 4,
+  },
+  input: {
+    width: '100%',
+    backgroundColor: '#ffffff',
+    borderTopWidth: 2,
+    borderLeftWidth: 2,
+    borderRightWidth: 2,
+    borderBottomWidth: 2,
+    borderTopColor: '#808080',
+    borderLeftColor: '#808080',
+    borderRightColor: '#ffffff',
+    borderBottomColor: '#ffffff',
+    padding: 8,
+    fontFamily: 'JetBrainsMono',
+    color: '#000',
+  },
+  buttonRow: {
+    flexDirection: 'row',
+    justifyContent: 'flex-end',
+    marginTop: 32,
+    gap: 8,
+  },
+  btnSmall: {
+    width: 'auto',
+    paddingHorizontal: 16,
+    paddingVertical: 4,
+  },
+  grid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    marginHorizontal: -4,
+  },
+  gridItem: {
+    width: '45%',
+    margin: '2.5%',
+    padding: 8,
+    backgroundColor: '#c0c0c0',
+    borderTopWidth: 2,
+    borderLeftWidth: 2,
+    borderRightWidth: 2,
+    borderBottomWidth: 2,
+    borderTopColor: '#ffffff',
+    borderLeftColor: '#ffffff',
+    borderRightColor: '#808080',
+    borderBottomColor: '#808080',
+    alignItems: 'center',
+  },
+  gridItemText: {
+    fontFamily: 'Inter',
+    fontWeight: 'bold',
+    fontSize: 12,
+    color: '#000',
+  },
+});
