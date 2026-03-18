@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, SafeAreaView, Dimensions, ActivityIndicator } from 'react-native';
+import { View, Text, StyleSheet, Dimensions, ActivityIndicator } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { useFonts } from 'expo-font';
 import { AnimatePresence } from 'moti';
+import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
 
 import Splash from './components/Splash';
 import Onboarding from './components/Onboarding';
@@ -45,31 +46,33 @@ export default function App() {
   const showNavigation = ['swipe', 'reels', 'chat', 'profile', 'vibes'].includes(currentScreen);
 
   return (
-    <SafeAreaView style={styles.container}>
-      <StatusBar style="light" />
-      <View style={[styles.main, chaosMode && styles.chaosMode]}>
-        {loadingOverlay}
+    <SafeAreaProvider>
+      <SafeAreaView style={styles.container}>
+        <StatusBar style="light" />
+        <View style={[styles.main, chaosMode && styles.chaosMode]}>
+          {loadingOverlay}
 
-        {/* Background Effects */}
-        <View style={styles.gridContainer}>
+          {/* Background Effects */}
+          <View style={styles.gridContainer}>
             {/* Grid simulation if possible, else skip or use simple view */}
+          </View>
+
+          <AnimatePresence exitBeforeEnter>
+            {currentScreen === 'splash' && <Splash key="splash" />}
+            {currentScreen === 'onboarding' && <Onboarding key="onboarding" onComplete={() => setCurrentScreen('swipe')} />}
+            {currentScreen === 'swipe' && <Swipe key="swipe" />}
+            {currentScreen === 'reels' && <Reels key="reels" />}
+            {currentScreen === 'chat' && <Chat key="chat" />}
+            {currentScreen === 'profile' && <Profile key="profile" chaosMode={chaosMode} setChaosMode={setChaosMode} />}
+            {currentScreen === 'vibes' && <VibeRooms key="vibes" />}
+          </AnimatePresence>
+
+          {showNavigation && (
+            <Navigation currentScreen={currentScreen} setScreen={setCurrentScreen} />
+          )}
         </View>
-
-        <AnimatePresence exitBeforeEnter>
-          {currentScreen === 'splash' && <Splash key="splash" />}
-          {currentScreen === 'onboarding' && <Onboarding key="onboarding" onComplete={() => setCurrentScreen('swipe')} />}
-          {currentScreen === 'swipe' && <Swipe key="swipe" />}
-          {currentScreen === 'reels' && <Reels key="reels" />}
-          {currentScreen === 'chat' && <Chat key="chat" />}
-          {currentScreen === 'profile' && <Profile key="profile" chaosMode={chaosMode} setChaosMode={setChaosMode} />}
-          {currentScreen === 'vibes' && <VibeRooms key="vibes" />}
-        </AnimatePresence>
-
-        {showNavigation && (
-          <Navigation currentScreen={currentScreen} setScreen={setCurrentScreen} />
-        )}
-      </View>
-    </SafeAreaView>
+      </SafeAreaView>
+    </SafeAreaProvider>
   );
 }
 
