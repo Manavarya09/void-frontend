@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, TextInput } from 'react-native';
 import { MotiView, AnimatePresence } from 'moti';
-import { LogOut, BrainCircuit, Edit2, Settings } from 'lucide-react-native';
+import { LogOut, BrainCircuit, Edit2 } from 'lucide-react-native';
 import { Image } from 'expo-image';
 import AIPersonality from './AIPersonality';
 

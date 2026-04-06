@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Dimensions, FlatList } from 'react-native';
+import React, { useState, useRef, useCallback } from 'react';
+import { View, Text, StyleSheet, TouchableOpacity, Dimensions, FlatList, ViewToken } from 'react-native';
 import { Heart, MessageCircle, Share2, Music, MoreVertical } from 'lucide-react-native';
 import { Image } from 'expo-image';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -93,11 +93,13 @@ export default function Reels() {
     );
   };
 
-  const onViewableItemsChanged = ({ viewableItems }) => {
-    if (viewableItems.length > 0) {
+  const onViewableItemsChanged = useCallback(({ viewableItems }: { viewableItems: ViewToken[] }) => {
+    if (viewableItems.length > 0 && viewableItems[0].index != null) {
       setCurrentReel(viewableItems[0].index);
     }
-  };
+  }, []);
+
+  const viewabilityConfig = useRef({ itemVisiblePercentThreshold: 50 }).current;
 
   return (
     <View style={styles.container}>
@@ -108,7 +110,7 @@ export default function Reels() {
         pagingEnabled
         showsVerticalScrollIndicator={false}
         onViewableItemsChanged={onViewableItemsChanged}
-        viewabilityConfig={{ itemVisiblePercentThreshold: 50 }}
+        viewabilityConfig={viewabilityConfig}
         style={{ flex: 1 }}
       />
     </View>

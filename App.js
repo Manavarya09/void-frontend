@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, Dimensions, ActivityIndicator } from 'react-native';
+import { View, Text, StyleSheet, ActivityIndicator } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { useFonts } from 'expo-font';
 import { AnimatePresence } from 'moti';
@@ -13,8 +13,6 @@ import Chat from './components/Chat';
 import Profile from './components/Profile';
 import Navigation from './components/Navigation';
 import VibeRooms from './components/VibeRooms';
-
-const { width, height } = Dimensions.get('window');
 
 export default function App() {
   const [fontsLoaded] = useFonts({
